@@ -1,9 +1,11 @@
 import axios from '../../api/axios';
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './SearchPage.css';
+import useDebounce from '../../hooks/useDebounce';
 
 const SearchPage = () => {
+  const navigate = useNavigate();
   const [searchResults, setSearchResults] = useState([]);
 
   console.log('useLocation', useLocation());
@@ -14,13 +16,14 @@ const SearchPage = () => {
   let query = useQuery();
   // Returns the first value associated to the given search parameter.
   const searchTerm = query.get('q');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   console.log('searchTerm', searchTerm);
 
   useEffect(() => {
-    if (searchTerm) {
-      fetchSearchMovie(searchTerm);
+    if (debouncedSearchTerm) {
+      fetchSearchMovie(debouncedSearchTerm);
     }
-  }, [searchTerm]);
+  }, [debouncedSearchTerm]);
 
   const fetchSearchMovie = async (searchTerm) => {
     try {
@@ -43,7 +46,11 @@ const SearchPage = () => {
 
             return (
               <div className="movie" key={movie.id}>
-                <div className="movie__column-poster">
+                <div
+                  onClick={() => navigate(`/${movie.id}`)}
+                  // path: ':movieId', element: <DetailPage />로 이동
+                  className="movie__column-poster"
+                >
                   <img
                     src={movieImageUrl}
                     alt="movieimage"
@@ -58,7 +65,9 @@ const SearchPage = () => {
     ) : (
       <section className="no-results">
         <div className="no-results__text">
-          <p>찾고자하는 검색어'{searchTerm}'에 맞는 영화가 없습니다.</p>
+          <p>
+            찾고자하는 검색어'{debouncedSearchTerm}'에 맞는 영화가 없습니다.
+          </p>
         </div>
       </section>
     );
