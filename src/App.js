@@ -46,7 +46,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div className="app">
-      <RouterProvider router={router} />
+      <RouterProvider basename="react-netflix-clone" router={router} />
     </div>
   );
 }
